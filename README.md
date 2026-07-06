@@ -1,8 +1,24 @@
-# Hi, I'm Zhuolun Li / Franklin.
+<p align="center">
+  <img src="./assets/banner.svg" alt="Zhuolun Li / Franklin - AI coding agents, eval systems, and developer automation" />
+</p>
 
-I build AI coding agents, evaluation systems, and developer workflow automation.
+<h1 align="center">Hi, I'm Zhuolun Li / Franklin.</h1>
 
-Currently focused on:
+<p align="center">
+  I build AI coding agents, evaluation systems, and developer workflow automation.
+</p>
+
+<p align="center">
+  <a href="https://zhuolun.li/">Website</a>
+  ·
+  <a href="https://github.com/icecreamlun">GitHub</a>
+  ·
+  <a href="https://www.linkedin.com/in/zhuolun-li-267757290/">LinkedIn</a>
+</p>
+
+---
+
+## Currently Building
 
 - AI coding agent evaluation and QA systems
 - Code review and issue detection evals
@@ -11,47 +27,25 @@ Currently focused on:
 
 ## Selected Work
 
-### Axolotl
+| Project | What it is | Focus |
+|---|---|---|
+| **Axolotl** | AI coding agent QA and evaluation system | Code review, issue detection, benchmark systems |
+| **Eval System** | Infrastructure for measuring and improving AI agent performance on engineering tasks | Task replay, metrics, error taxonomy, human validation |
+| [**Understudy**](https://github.com/icecreamlun/understudy) | Codex as a forward-deployed engineer that turns repeated work into reusable skills | Workflow automation, Codex, human sign-off |
+| [**Auto-FDE**](https://github.com/icecreamlun/fde-agent) | Agent memory prototype for repeated workflows and user preferences | Memory, preferences, HydraDB |
 
-AI coding agent QA and evaluation system.
+## Engineering Background
 
-I work on evaluating agent behavior across code review, issue detection, and real engineering workflows. My focus is benchmark design, failure analysis, prompt iteration, and production-oriented evaluation loops.
+| Area | Projects |
+|---|---|
+| Agent behavior and benchmarks | [codex-poker-bench](https://github.com/icecreamlun/codex-poker-bench), [QA-Agents-Sentinel](https://github.com/icecreamlun/QA-Agents-Sentinel) |
+| Distributed systems | [Twitter Streaming Searching Microservices](https://github.com/icecreamlun/Twitter_Streaming_Searching_Microservices) |
+| Security and systems | [Car-Cloud Communication Website Based on TLS](https://github.com/icecreamlun/Construction-of-Car-Cloud-Communication-Website-Based-on-TLS) |
+| ML and perception | BEVFormer, deep learning experiments, sentiment classification |
 
-**Areas:** AI coding agents, evals, QA, code review, benchmark systems
+## What I Care About
 
-### Eval System
-
-A system for measuring and improving AI agent performance on engineering tasks.
-
-The goal is to move beyond simple pass/fail checks and evaluate whether agents produce accurate, useful, and reviewable engineering work. This includes task replay, metric design, error taxonomy, and human-in-the-loop validation.
-
-**Areas:** agent evaluation, benchmark infrastructure, workflow replay, code quality
-
-### [Understudy](https://github.com/icecreamlun/understudy)
-
-Codex as your company's forward-deployed engineer.
-
-Understudy watches repetitive workflows, turns them into reusable skills, and runs them end-to-end with human sign-off.
-
-**Stack:** Python, Codex, workflow automation
-
-### [Auto-FDE](https://github.com/icecreamlun/fde-agent)
-
-An AI agent that remembers repeated workflows and user preferences.
-
-Built for the HydraDB Agentic Memory Hackathon. It explores how agent memory can reduce repeated instruction and make long-running AI workflows more personal and reliable.
-
-**Stack:** Python, agent memory, HydraDB
-
-## Other Projects
-
-- [codex-poker-bench](https://github.com/icecreamlun/codex-poker-bench) - experiments around Codex-style agent behavior and decision-making.
-- [QA-Agents-Sentinel](https://github.com/icecreamlun/QA-Agents-Sentinel) - QA workflows for agentic systems.
-- [Twitter Streaming Searching Microservices](https://github.com/icecreamlun/Twitter_Streaming_Searching_Microservices) - Kafka, Spring Cloud, Docker, and event-driven microservices.
-- [Construction of Car-Cloud Communication Website Based on TLS](https://github.com/icecreamlun/Construction-of-Car-Cloud-Communication-Website-Based-on-TLS) - secure vehicle-cloud communication in C++.
-
-## Links
-
-- Website: [zhuolun.li](https://zhuolun.li/)
-- GitHub: [github.com/icecreamlun](https://github.com/icecreamlun)
-- LinkedIn: [Zhuolun Li](https://www.linkedin.com/in/zhuolun-li-267757290/)
+- Evals that measure whether agents produce useful engineering work, not just passing outputs
+- Feedback loops for code review, issue detection, and production QA
+- Agent workflows that remember user preferences and reduce repeated instruction
+- Tools that make AI-assisted engineering more observable, reliable, and reviewable
