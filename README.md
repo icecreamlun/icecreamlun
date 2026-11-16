@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  I build AI coding agents, the evals that keep them honest, and the workflow automation around them.
+  I build backend systems, infrastructure, AI agents, and the evals that keep them honest.
 </p>
 
 <p align="center">
@@ -13,9 +13,9 @@
 
 ## Currently Building
 
-- Evaluation and QA systems for AI coding agents
-- Code review and issue detection evals
-- Codex-powered engineering workflows
+- Backend services and infrastructure, mostly in Go
+- AI coding agents and Codex-powered engineering workflows
+- Evaluation and QA systems for agents: code review and issue detection evals
 - Agent memory for repeated developer tasks
 
 ## Agents and Evals
@@ -44,14 +44,15 @@
 | Security and systems | [Car-Cloud Communication over TLS](https://github.com/icecreamlun/Construction-of-Car-Cloud-Communication-Website-Based-on-TLS) |
 | ML and perception | [BEVFormer](https://github.com/icecreamlun/BEVFormer) · [NYU Deep Learning](https://github.com/icecreamlun/NYU_Deep_Learning) · [LSTM Sentiment Classification](https://github.com/icecreamlun/LSTM_in_Text_Sentiment_Classification) |
 
-## Contributions in 3D
+## Contributions
 
 <p align="center">
-  <img src="./profile-3d-contrib/profile-night-rainbow.svg" width="100%" alt="3D contribution calendar" />
+  <img src="./assets/contrib.svg" width="100%" alt="Isometric contribution calendar and commits by language, led by Go" />
 </p>
 
 ## What I Care About
 
+- Backend and infrastructure that stay boring in production
 - Evals that measure whether agents produce useful engineering work, not just passing outputs
 - Feedback loops for code review, issue detection, and production QA
 - Agent workflows that remember user preferences and reduce repeated instruction
