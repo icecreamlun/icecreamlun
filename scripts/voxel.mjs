@@ -45,6 +45,7 @@ export class Canvas {
 //   ex, ey, et   emissive colour for the +x / +y / top face only
 //   fx, fy, ft   lit albedo override for the +x / +y / top face only
 //   glass        does not block light rays
+//   flat         shaded without occlusion or shadows, for a clean cartoon look
 const PAD = 4, NX = 176, NY = 104, NZ = 56;
 const idx = (x, y, z) => ((x + PAD) * NY + (y + PAD)) * NZ + (z + PAD);
 export class Scene {
@@ -130,7 +131,7 @@ export function renderLit(scene, cfg) {
       tot += w;
       if (solid(c[0] + tu[0] * du + tv[0] * dv, c[1] + tu[1] * du + tv[1] * dv, c[2] + tu[2] * du + tv[2] * dv)) acc += w;
     }
-    const ao = 1 - 0.62 * (acc / tot) ** 0.7;
+    const ao = v.flat ? 1 : 1 - 0.62 * (acc / tot) ** 0.7;
     const out = ambient.map((a) => a * FACE_AMB[f] * ao);
     for (const L of dirLights) {
       const nd = n[0] * L.dir[0] + n[1] * L.dir[1] + n[2] * L.dir[2];
@@ -139,7 +140,7 @@ export function renderLit(scene, cfg) {
       const samples = L.soft ? SOFT : [[0, 0, 0]];
       for (const s of samples) {
         const d = norm([L.dir[0] + s[0] * (L.soft || 0), L.dir[1] + s[1] * (L.soft || 0), L.dir[2] + s[2] * (L.soft || 0)]);
-        if (!blocked(p, d, 90, L.windowed)) lit++;
+        if (v.flat ? !L.windowed : !blocked(p, d, 90, L.windowed)) lit++;
       }
       const k = nd * lit / samples.length;
       for (let i = 0; i < 3; i++) out[i] += L.color[i] * k;
@@ -151,7 +152,7 @@ export function renderLit(scene, cfg) {
       if (att < 0.004) continue;
       const d = [vx / dist, vy / dist, vz / dist];
       const nd = Math.max(0, (n[0] * d[0] + n[1] * d[1] + n[2] * d[2] + 0.2) / 1.2);
-      if (nd <= 0 || blocked(p, d, dist - 0.7, false)) continue;
+      if (nd <= 0 || (!v.flat && blocked(p, d, dist - 0.7, false))) continue;
       for (let i = 0; i < 3; i++) out[i] += L.color[i] * nd * att;
     }
     if (cache) cache.set(ck, out);

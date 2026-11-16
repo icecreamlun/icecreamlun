@@ -6,7 +6,7 @@
 // Usage: node scripts/gen-banner.mjs
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { FONT, Scene, makeRand, renderLit } from './voxel.mjs';
+import { Canvas, FONT, Scene, makeRand, renderLit } from './voxel.mjs';
 
 const GW = 600, GH = 232, S = 2;      // grid cells and cell size in px
 const W = 72, H = 30;                 // room footprint (square) and wall height, in voxels
@@ -17,7 +17,7 @@ const C = {
   wood: ['#c9a074', '#c2976a', '#d0a87c'], seam: '#aa8359', slab: '#a17c56',
   walnut: '#8a623f', oak: '#b58a5c', white: '#f4f2ee', linen: '#e4d9c6', terracotta: '#c56f52',
   dark: '#25272e', metal: '#8f939c', red: '#c8372f', redDark: '#a92c26', skin: '#e6b89c', hair: '#35292b',
-  black: '#0e0f12', cat: '#8d9bb0', catDark: '#75839a', leaf: ['#5c8a5e', '#6a9a68', '#4f7d55'],
+  black: '#0e0f12', cat: '#97a5ba', catDark: '#7b89a0', leaf: ['#5c8a5e', '#6a9a68', '#4f7d55'],
 };
 const SYNTAX = ['#e06c75', '#98c379', '#61afef', '#e5c07b', '#c678dd', '#abb2bf'];
 
@@ -99,18 +99,6 @@ function buildScene(st, night) {
   for (let x = 23; x <= 29; x++) s.get(x, 39, 4).fy = '#8f6a43';
   s.get(26, 39, 6).fy = '#5a4630'; s.get(26, 39, 2).fy = '#5a4630';
   s.box(24, 34, 8, 28, 37, 8, '#3f5f7a').box(24, 34, 9, 27, 37, 9, '#e9e4da');
-
-  // British Shorthair, blue, loafing on the duvet
-  // sitting upright, facing the viewer: pear-shaped body, wide round head, small ears
-  s.ellipsoid(10.5, 53, 10.6, st.cat ? 4.7 : 4.4, st.cat ? 4.5 : 4.2, 3.4, C.cat);
-  s.ellipsoid(10.5, 53.5, 13.3, 3.4, 3.2, 2.2, C.cat);
-  s.ellipsoid(10.5, 55, 16.3, 3.9, 3.4, 3, C.cat);
-  s.ellipsoid(10.5, 55.8, 15.1, 4.2, 2.8, 1.8, C.cat);
-  s.box(7, 54, 19, 8, 55, 19, C.cat).set(7, 54, 20, C.catDark).box(12, 54, 19, 13, 55, 19, C.cat).set(13, 54, 20, C.catDark);
-  s.box(8, 57, 8, 9, 58, 8, C.cat).box(11, 57, 8, 12, 58, 8, C.cat);
-  s.box(15, 50, 8, 16, 56, 8, C.catDark).box(13, 57, 8, 15, 57, 8, C.catDark);
-  for (const x of [8, 12]) { const v = s.front(x, 16, 50, 62); if (v) v.fy = st.blink ? C.catDark : '#d9902f'; }
-  { const v = s.front(10, 15, 50, 62); if (v) v.fy = '#56627a'; }
 
   // shelves on the right wall
   s.box(3, 0, 16, 19, 3, 16, C.oak).box(3, 0, 23, 19, 3, 23, C.oak);
@@ -214,6 +202,47 @@ function buildScene(st, night) {
   return s;
 }
 
+// ---------- the cat: a hand-drawn sprite, because a round face does not survive voxelisation ----------
+// A blue British Shorthair as one round blob. o outline, b base, l light, d shade,
+// m muzzle and paws, e copper iris, p pupil, w highlight, n nose, i ear and blush.
+const CAT = [
+  '....oo..............oo....',
+  '...olbo............oblo...',
+  '..olibbo..........obbilo..',
+  '..olibbboooooooooobbbilo..',
+  '.olbbbbbllllllllllbbbbblo.',
+  '.olbbbbbbbbbbbbbbbbbbbbbo.',
+  'olbbbbbbbbbbbbbbbbbbbbbbbo',
+  'olbbbbbbbbbbbbbbbbbbbbbbbo',
+  'obbbbweebbbbbbbbbbweebbbbo',
+  'obbbbepebbbbbbbbbbepebbbbo',
+  'obbbbeeebbbbnnbbbbeeebbbbo',
+  'obbbbbbbbmmmnnmmmbbbbbbbbo',
+  'obbiibbbmmmmmmmmmmbbbiibbo',
+  'obbbbbbbbmmmmmmmmbbbbbbbbo',
+  'odbbbbbbbbbbbbbbbbbbbbbbdo',
+  'oddbbbbbbbbbbbbbbbbbbbbddo',
+  '.odddbbbbbbbbbbbbbbbbdddo.',
+  '.oddddmmmddddddddmmmddddo.',
+  '..oodommmodddddddommmodoo.',
+  '....ooooooooooooooooooo...',
+];
+const CAT_BLINK = { 8: 'obbbbbbbbbbbbbbbbbbbbbbbbo', 9: 'obbbbooobbbbbbbbbboooobbbo'.slice(0, 18) + 'ooobbbbo', 10: 'obbbbbbbbbbbnnbbbbbbbbbbbo' };
+const CAT_PAL = {
+  light: { o: '#55617a', b: '#97a5ba', l: '#b7c3d6', d: '#7b89a0', m: '#c6d0df', e: '#eba93c', p: '#2a2320', w: '#ffffff', n: '#e0a0a8', i: '#c9a3b4' },
+  dark: { o: '#262c40', b: '#5d6987', l: '#7583a3', d: '#49546f', m: '#8794b1', e: '#d9a047', p: '#17151b', w: '#e8ecf5', n: '#b98793', i: '#8a7896' },
+};
+const CAT_X = 349, CAT_Y = 108;
+const catSprite = (theme, rows) => {
+  const c = new Canvas();
+  Object.entries(rows).forEach(([j, row]) => [...row].forEach((ch, i) => {
+    if (ch !== '.') c.set(CAT_X + i, CAT_Y + Number(j), CAT_PAL[theme][ch]);
+  }));
+  return c.svg();
+};
+CAT.forEach((r) => { if (r.length !== 26) throw new Error(`cat row length ${r.length}: ${r}`); });
+Object.values(CAT_BLINK).forEach((r) => { if (r.length !== 26) throw new Error(`blink row length ${r.length}: ${r}`); });
+
 // ---------- lighting ----------
 const LIGHTS = {
   dark: {
@@ -253,8 +282,6 @@ function build(theme) {
   };
   cycle(7, 9.8, (f) => ({ code: f }));
   cycle(6, 13.2, (f) => ({ term: f }));
-  frame({ cat: 1 }, 'cyc2 5s steps(1) 2.5s infinite', false);
-  frame({ blink: 1 }, 'blink 6.5s steps(1) infinite');
   frame({ bot: 1 }, 'blink 8.3s steps(1) -3s infinite');
   frame({ led: 0 }, 'cyc2 7s steps(1) 3.5s infinite');
   frame({ led: 2 }, 'cyc2 11s steps(1) 5.5s infinite');
@@ -271,13 +298,14 @@ function build(theme) {
 
   return `<svg width="${GW * S}" height="${GH * S}" viewBox="0 0 ${GW * S} ${GH * S}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
 <title id="title">Zhuolun Li / Franklin</title>
-<desc id="desc">Backend, infrastructure, AI agents and evals. Isometric pixel art of a room ${night ? 'at night' : 'in daylight'}: a developer in a red hoodie and black headphones at a white desk with two monitors, an oak floor, a server rack, a helper robot, and a blue British Shorthair cat on the bed.</desc>
+<desc id="desc">Backend, infrastructure, AI agents and evals. Isometric pixel art of a room ${night ? 'at night' : 'in daylight'}: a developer in a red hoodie and black headphones at a white desk with two monitors, an oak floor, a server rack, a helper robot, and a round blue British Shorthair cat on the bed.</desc>
 <style>
 .fr{visibility:hidden}
 @keyframes cyc2{0%{visibility:visible}50%,100%{visibility:hidden}}
 @keyframes cyc6{0%{visibility:visible}16.67%,100%{visibility:hidden}}
 @keyframes cyc7{0%{visibility:visible}14.29%,100%{visibility:hidden}}
 @keyframes blink{0%,100%{visibility:hidden}60%{visibility:visible}63%{visibility:hidden}}
+.breathe{animation:br 4s steps(1) infinite}@keyframes br{50%{transform:translateY(-1px)}}
 .lamp{animation:lamp 7s ease-in-out infinite alternate}@keyframes lamp{to{opacity:.82}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
@@ -289,6 +317,10 @@ ${glows.map((g) => g[0]).join('\n')}
 <g transform="scale(${S})" shape-rendering="crispEdges">
 ${base.svg()}
 ${layers.join('\n')}
+</g>
+<ellipse cx="${(CAT_X + 13) * S}" cy="${(CAT_Y + 19) * S}" rx="30" ry="7" fill="#000" opacity="${night ? 0.35 : 0.2}"/>
+<g transform="scale(${S})" shape-rendering="crispEdges">
+<g class="breathe">${catSprite(theme, CAT)}<g class="fr" style="animation:blink 5.7s steps(1) infinite">${catSprite(theme, CAT_BLINK)}</g></g>
 </g>
 ${glows.length ? `<g class="lamp" style="mix-blend-mode:screen">${glows.map((g) => g[1]).join('')}</g>` : ''}
 <g font-family="${FONT}">
