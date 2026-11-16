@@ -203,36 +203,36 @@ function buildScene(st, night) {
 }
 
 // ---------- the cat: a hand-drawn sprite, because a round face does not survive voxelisation ----------
-// A blue British Shorthair as one round blob. o outline, b base, l light, d shade,
-// m muzzle and paws, e copper iris, p pupil, w highlight, n nose, i ear and blush.
+// A chubby blue British Shorthair lying as a loaf, drawn without outlines and shaded
+// from above like the rest of the room. l light, b base, d shade, k underside,
+// e eye, n nose, i blush, t tail.
 const CAT = [
-  '....oo..............oo....',
-  '...olbo............oblo...',
-  '..olibbo..........obbilo..',
-  '..olibbboooooooooobbbilo..',
-  '.olbbbbbllllllllllbbbbblo.',
-  '.olbbbbbbbbbbbbbbbbbbbbbo.',
-  'olbbbbbbbbbbbbbbbbbbbbbbbo',
-  'olbbbbbbbbbbbbbbbbbbbbbbbo',
-  'obbbbweebbbbbbbbbbweebbbbo',
-  'obbbbepebbbbbbbbbbepebbbbo',
-  'obbbbeeebbbbnnbbbbeeebbbbo',
-  'obbbbbbbbmmmnnmmmbbbbbbbbo',
-  'obbiibbbmmmmmmmmmmbbbiibbo',
-  'obbbbbbbbmmmmmmmmbbbbbbbbo',
-  'odbbbbbbbbbbbbbbbbbbbbbbdo',
-  'oddbbbbbbbbbbbbbbbbbbbbddo',
-  '.odddbbbbbbbbbbbbbbbbdddo.',
-  '.oddddmmmddddddddmmmddddo.',
-  '..oodommmodddddddommmodoo.',
-  '....ooooooooooooooooooo...',
+  '...l.....l....................',
+  '..lbl...lbl...................',
+  '..lbbl.lbbllllllllll..........',
+  '.llbbbbbbbbbbbbbbbbbbll.......',
+  '.lbbbbbbbbbbbbbbbbbbbbbll...tt',
+  'lbbbbbbbbbbbbbbbbbbbbbbbbl..tt',
+  'lbbebbbbbebbbbbbbbbbbbbbbbl.tt',
+  'lbbebbnbbebbbbbbbbbbbbbbbbbttd',
+  'lbiibbbbbiibbbbbbbbbbbbbbbbbtd',
+  'lbbbbbbbbbbbbbbbbbbbbbbbbbbbtd',
+  'lbbbbbbbbbbbbbbbbbbbbbbbbbbbtd',
+  'dbbbbbbbbbbbbbbbbbbbbbbbbbbbtd',
+  'dbbbbbbbbbbbbbbbbbbbbbbbbbbbtd',
+  'dbbbbbbbbbbbbbbbbbbbbbbbbbbtdd',
+  'ddbbbbbbbbbbbbbbbbbbbbbbbbbddd',
+  '.dddbbbbbbbbbbbbbbbbbbbbbdddd.',
+  '..dddddddbbbbbbbbbbbdddddddd..',
+  '...kkdddkkddddddddkkdddkkk....',
+  '....kk...kk.......kk...kk.....',
 ];
-const CAT_BLINK = { 8: 'obbbbbbbbbbbbbbbbbbbbbbbbo', 9: 'obbbbooobbbbbbbbbboooobbbo'.slice(0, 18) + 'ooobbbbo', 10: 'obbbbbbbbbbbnnbbbbbbbbbbbo' };
+const CAT_BLINK = { 6: CAT[6].replaceAll('e', 'b') };
 const CAT_PAL = {
-  light: { o: '#55617a', b: '#97a5ba', l: '#b7c3d6', d: '#7b89a0', m: '#c6d0df', e: '#eba93c', p: '#2a2320', w: '#ffffff', n: '#e0a0a8', i: '#c9a3b4' },
-  dark: { o: '#262c40', b: '#5d6987', l: '#7583a3', d: '#49546f', m: '#8794b1', e: '#d9a047', p: '#17151b', w: '#e8ecf5', n: '#b98793', i: '#8a7896' },
+  light: { l: '#bcc8d9', b: '#9aa8bd', d: '#7d8ba2', k: '#667389', e: '#2a2320', n: '#e0a0a8', i: '#e3b3c0', t: '#8492a9' },
+  dark: { l: '#7a88a8', b: '#616d8b', d: '#4b5671', k: '#3a4359', e: '#14131a', n: '#b98793', i: '#9a7f9a', t: '#566280' },
 };
-const CAT_X = 349, CAT_Y = 108;
+const CAT_W = 30, CAT_X = 346, CAT_Y = 108;
 const catSprite = (theme, rows) => {
   const c = new Canvas();
   Object.entries(rows).forEach(([j, row]) => [...row].forEach((ch, i) => {
@@ -240,8 +240,7 @@ const catSprite = (theme, rows) => {
   }));
   return c.svg();
 };
-CAT.forEach((r) => { if (r.length !== 26) throw new Error(`cat row length ${r.length}: ${r}`); });
-Object.values(CAT_BLINK).forEach((r) => { if (r.length !== 26) throw new Error(`blink row length ${r.length}: ${r}`); });
+CAT.forEach((r) => { if (r.length !== CAT_W) throw new Error(`cat row length ${r.length}: ${r}`); });
 
 // ---------- lighting ----------
 const LIGHTS = {
@@ -298,7 +297,7 @@ function build(theme) {
 
   return `<svg width="${GW * S}" height="${GH * S}" viewBox="0 0 ${GW * S} ${GH * S}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
 <title id="title">Zhuolun Li / Franklin</title>
-<desc id="desc">Backend, infrastructure, AI agents and evals. Isometric pixel art of a room ${night ? 'at night' : 'in daylight'}: a developer in a red hoodie and black headphones at a white desk with two monitors, an oak floor, a server rack, a helper robot, and a round blue British Shorthair cat on the bed.</desc>
+<desc id="desc">Backend, infrastructure, AI agents and evals. Isometric pixel art of a room ${night ? 'at night' : 'in daylight'}: a developer in a red hoodie and black headphones at a white desk with two monitors, an oak floor, a server rack, a helper robot, and a chubby blue British Shorthair cat loafing on the bed.</desc>
 <style>
 .fr{visibility:hidden}
 @keyframes cyc2{0%{visibility:visible}50%,100%{visibility:hidden}}
@@ -318,7 +317,7 @@ ${glows.map((g) => g[0]).join('\n')}
 ${base.svg()}
 ${layers.join('\n')}
 </g>
-<ellipse cx="${(CAT_X + 13) * S}" cy="${(CAT_Y + 19) * S}" rx="30" ry="7" fill="#000" opacity="${night ? 0.35 : 0.2}"/>
+<ellipse cx="${(CAT_X + 15) * S}" cy="${(CAT_Y + 18) * S}" rx="32" ry="6" fill="#000" opacity="${night ? 0.35 : 0.2}"/>
 <g transform="scale(${S})" shape-rendering="crispEdges">
 <g class="breathe">${catSprite(theme, CAT)}<g class="fr" style="animation:blink 5.7s steps(1) infinite">${catSprite(theme, CAT_BLINK)}</g></g>
 </g>
