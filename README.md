@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="./assets/banner.svg" width="100%" alt="Zhuolun Li / Franklin: isometric pixel art of a developer's room at night" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/banner-dark.svg" />
+    <img src="./assets/banner-light.svg" width="100%" alt="Zhuolun Li / Franklin: backend, infrastructure, AI agents and evals. Isometric pixel art of a developer's room." />
+  </picture>
 </p>
 
 <p align="center">
@@ -47,7 +50,10 @@
 ## Contributions
 
 <p align="center">
-  <img src="./assets/contrib.svg" width="100%" alt="Isometric contribution calendar and commits by language, led by Go" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/contrib-dark.svg" />
+    <img src="./assets/contrib-light.svg" width="100%" alt="Isometric contribution calendar and commits by language, led by Go" />
+  </picture>
 </p>
 
 ## What I Care About
