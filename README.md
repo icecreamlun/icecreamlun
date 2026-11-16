@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/banner.svg" width="100%" alt="Zhuolun Li / Franklin: AI coding agents, eval systems, and developer automation" />
+  <img src="./assets/banner.svg" width="100%" alt="Pixel art of a developer's room at night with a neon sign reading Zhuolun Li / Franklin" />
 </p>
 
 <p align="center">
