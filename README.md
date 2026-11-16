@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/banner.svg" width="100%" alt="Pixel art of a developer's room at night with a neon sign reading Zhuolun Li / Franklin" />
+  <img src="./assets/banner.svg" width="100%" alt="Zhuolun Li / Franklin: isometric pixel art of a developer's room at night" />
 </p>
 
 <p align="center">
