@@ -46,6 +46,8 @@ export class Canvas {
 //   fx, fy, ft   lit albedo override for the +x / +y / top face only
 //   glass        does not block light rays
 //   flat         shaded without occlusion or shadows, for a clean cartoon look
+//   n            smooth surface normal [x,y,z] used for every face of the voxel, so
+//                curved shapes shade as curves instead of showing stair steps
 const PAD = 4, NX = 176, NY = 104, NZ = 56;
 const idx = (x, y, z) => ((x + PAD) * NY + (y + PAD)) * NZ + (z + PAD);
 export class Scene {
@@ -121,9 +123,10 @@ export function renderLit(scene, cfg) {
   const light = (v, f) => {
     const ck = idx(v.x, v.y, v.z) * 3 + f;
     if (cache && cache.has(ck)) return cache.get(ck);
-    const n = NORMALS[f], [tu, tv] = TANGENTS[f];
-    const c = [v.x + n[0], v.y + n[1], v.z + n[2]];
-    const p = [v.x + 0.5 + n[0] * 0.52, v.y + 0.5 + n[1] * 0.52, v.z + 0.5 + n[2] * 0.52];
+    const fn = NORMALS[f], [tu, tv] = TANGENTS[f];
+    const n = v.n || fn, flat = v.flat || !!v.n;
+    const c = [v.x + fn[0], v.y + fn[1], v.z + fn[2]];
+    const p = [v.x + 0.5 + fn[0] * 0.52, v.y + 0.5 + fn[1] * 0.52, v.z + 0.5 + fn[2] * 0.52];
     let acc = 0, tot = 0;
     for (let du = -2; du <= 2; du++) for (let dv = -2; dv <= 2; dv++) {
       if (!du && !dv) continue;
@@ -131,8 +134,9 @@ export function renderLit(scene, cfg) {
       tot += w;
       if (solid(c[0] + tu[0] * du + tv[0] * dv, c[1] + tu[1] * du + tv[1] * dv, c[2] + tu[2] * du + tv[2] * dv)) acc += w;
     }
-    const ao = v.flat ? 1 : 1 - 0.62 * (acc / tot) ** 0.7;
-    const out = ambient.map((a) => a * FACE_AMB[f] * ao);
+    const ao = flat ? 1 : 1 - 0.62 * (acc / tot) ** 0.7;
+    const fa = v.n ? 0.66 + 0.34 * Math.max(0, n[2]) + 0.08 * Math.max(0, n[1]) : FACE_AMB[f];
+    const out = ambient.map((a) => a * fa * ao);
     for (const L of dirLights) {
       const nd = n[0] * L.dir[0] + n[1] * L.dir[1] + n[2] * L.dir[2];
       if (nd <= 0) continue;
@@ -140,7 +144,7 @@ export function renderLit(scene, cfg) {
       const samples = L.soft ? SOFT : [[0, 0, 0]];
       for (const s of samples) {
         const d = norm([L.dir[0] + s[0] * (L.soft || 0), L.dir[1] + s[1] * (L.soft || 0), L.dir[2] + s[2] * (L.soft || 0)]);
-        if (v.flat ? !L.windowed : !blocked(p, d, 90, L.windowed)) lit++;
+        if (flat ? !L.windowed : !blocked(p, d, 90, L.windowed)) lit++;
       }
       const k = nd * lit / samples.length;
       for (let i = 0; i < 3; i++) out[i] += L.color[i] * k;
@@ -152,7 +156,7 @@ export function renderLit(scene, cfg) {
       if (att < 0.004) continue;
       const d = [vx / dist, vy / dist, vz / dist];
       const nd = Math.max(0, (n[0] * d[0] + n[1] * d[1] + n[2] * d[2] + 0.2) / 1.2);
-      if (nd <= 0 || (!v.flat && blocked(p, d, dist - 0.7, false))) continue;
+      if (nd <= 0 || (!flat && blocked(p, d, dist - 0.7, false))) continue;
       for (let i = 0; i < 3; i++) out[i] += L.color[i] * nd * att;
     }
     if (cache) cache.set(ck, out);

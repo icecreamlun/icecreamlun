@@ -6,7 +6,7 @@
 // Usage: node scripts/gen-banner.mjs
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { Canvas, FONT, Scene, makeRand, renderLit } from './voxel.mjs';
+import { FONT, Scene, makeRand, renderLit } from './voxel.mjs';
 
 const GW = 600, GH = 232, S = 2;      // grid cells and cell size in px
 const W = 72, H = 30;                 // room footprint (square) and wall height, in voxels
@@ -99,6 +99,35 @@ function buildScene(st, night) {
   for (let x = 23; x <= 29; x++) s.get(x, 39, 4).fy = '#8f6a43';
   s.get(26, 39, 6).fy = '#5a4630'; s.get(26, 39, 2).fy = '#5a4630';
   s.box(24, 34, 8, 28, 37, 8, '#3f5f7a').box(24, 34, 9, 27, 37, 9, '#e9e4da');
+
+  // British Shorthair, blue: a chubby loaf lying along the bed, big head towards the viewer
+  {
+    const F = { flat: true };
+    const blob = (cx, cy, cz, rx, ry, rz, n, c) => {
+      for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++)
+        for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++)
+          for (let z = 8; z <= Math.ceil(cz + rz); z++)
+          {
+              const d = [(x + 0.5 - cx) / rx, (y + 0.5 - cy) / ry, (z + 0.5 - cz) / rz];
+              if (Math.abs(d[0]) ** n + Math.abs(d[1]) ** n + Math.abs(d[2]) ** n > 1) continue;
+              const g = d.map((v, i) => Math.sign(v) * Math.abs(v) ** (n - 1) / [rx, ry, rz][i]);
+              const l = Math.hypot(...g) || 1;
+              s.set(x, y, z, c, { n: g.map((v) => v / l) });
+            }
+    };
+    blob(8.5, 54, 10, 6.6, 4.4, st.cat ? 4.3 : 3.9, 2.5, C.cat);          // body, low and wide
+    blob(14, 54, 11.8, 4.4, 5.3, 5.7, 2.4, C.cat);                       // head, bigger than the body
+    for (const y0 of [49, 56]) {                                         // pointed ears
+      s.box(13, y0, 15, 15, y0 + 2, 18, '#8a98ae', F).box(13, y0 + 1, 19, 14, y0 + 1, 19, '#8a98ae', F).set(14, y0 + 1, 20, '#8a98ae', F);
+      for (const z of [17, 18]) s.get(15, y0 + 1, z).fx = '#d9a3b0';
+    }
+    s.box(2, 58, 8, 9, 58, 8, C.catDark, F).box(2, 58, 9, 3, 58, 9, C.catDark, F);     // tail wrapped along the flank
+    s.box(18, 51, 8, 19, 52, 8, '#b3bfd1', F).box(18, 55, 8, 19, 56, 8, '#b3bfd1', F); // front paws
+    const face = (y, z, c) => { for (let x = 22; x >= 10; x--) { const v = s.get(x, y, z); if (v) { v.fx = c; return; } } };
+    for (const y of [51, 56]) face(y, 13, st.blink ? C.catDark : '#2a2320');
+    face(53, 12, '#e0a0a8'); face(54, 12, '#e0a0a8');
+    face(50, 11, '#c2a5b8'); face(57, 11, '#c2a5b8');
+  }
 
   // shelves on the right wall
   s.box(3, 0, 16, 19, 3, 16, C.oak).box(3, 0, 23, 19, 3, 23, C.oak);
@@ -202,46 +231,6 @@ function buildScene(st, night) {
   return s;
 }
 
-// ---------- the cat: a hand-drawn sprite, because a round face does not survive voxelisation ----------
-// A chubby blue British Shorthair lying as a loaf, drawn without outlines and shaded
-// from above like the rest of the room. l light, b base, d shade, k underside,
-// e eye, n nose, i blush, t tail.
-const CAT = [
-  '...l.....l....................',
-  '..lbl...lbl...................',
-  '..lbbl.lbbllllllllll..........',
-  '.llbbbbbbbbbbbbbbbbbbll.......',
-  '.lbbbbbbbbbbbbbbbbbbbbbll...tt',
-  'lbbbbbbbbbbbbbbbbbbbbbbbbl..tt',
-  'lbbebbbbbebbbbbbbbbbbbbbbbl.tt',
-  'lbbebbnbbebbbbbbbbbbbbbbbbbttd',
-  'lbiibbbbbiibbbbbbbbbbbbbbbbbtd',
-  'lbbbbbbbbbbbbbbbbbbbbbbbbbbbtd',
-  'lbbbbbbbbbbbbbbbbbbbbbbbbbbbtd',
-  'dbbbbbbbbbbbbbbbbbbbbbbbbbbbtd',
-  'dbbbbbbbbbbbbbbbbbbbbbbbbbbbtd',
-  'dbbbbbbbbbbbbbbbbbbbbbbbbbbtdd',
-  'ddbbbbbbbbbbbbbbbbbbbbbbbbbddd',
-  '.dddbbbbbbbbbbbbbbbbbbbbbdddd.',
-  '..dddddddbbbbbbbbbbbdddddddd..',
-  '...kkdddkkddddddddkkdddkkk....',
-  '....kk...kk.......kk...kk.....',
-];
-const CAT_BLINK = { 6: CAT[6].replaceAll('e', 'b') };
-const CAT_PAL = {
-  light: { l: '#bcc8d9', b: '#9aa8bd', d: '#7d8ba2', k: '#667389', e: '#2a2320', n: '#e0a0a8', i: '#e3b3c0', t: '#8492a9' },
-  dark: { l: '#7a88a8', b: '#616d8b', d: '#4b5671', k: '#3a4359', e: '#14131a', n: '#b98793', i: '#9a7f9a', t: '#566280' },
-};
-const CAT_W = 30, CAT_X = 346, CAT_Y = 108;
-const catSprite = (theme, rows) => {
-  const c = new Canvas();
-  Object.entries(rows).forEach(([j, row]) => [...row].forEach((ch, i) => {
-    if (ch !== '.') c.set(CAT_X + i, CAT_Y + Number(j), CAT_PAL[theme][ch]);
-  }));
-  return c.svg();
-};
-CAT.forEach((r) => { if (r.length !== CAT_W) throw new Error(`cat row length ${r.length}: ${r}`); });
-
 // ---------- lighting ----------
 const LIGHTS = {
   dark: {
@@ -281,6 +270,8 @@ function build(theme) {
   };
   cycle(7, 9.8, (f) => ({ code: f }));
   cycle(6, 13.2, (f) => ({ term: f }));
+  frame({ cat: 1 }, 'cyc2 5s steps(1) 2.5s infinite', false);
+  frame({ blink: 1 }, 'blink 6.5s steps(1) infinite');
   frame({ bot: 1 }, 'blink 8.3s steps(1) -3s infinite');
   frame({ led: 0 }, 'cyc2 7s steps(1) 3.5s infinite');
   frame({ led: 2 }, 'cyc2 11s steps(1) 5.5s infinite');
@@ -304,7 +295,6 @@ function build(theme) {
 @keyframes cyc6{0%{visibility:visible}16.67%,100%{visibility:hidden}}
 @keyframes cyc7{0%{visibility:visible}14.29%,100%{visibility:hidden}}
 @keyframes blink{0%,100%{visibility:hidden}60%{visibility:visible}63%{visibility:hidden}}
-.breathe{animation:br 4s steps(1) infinite}@keyframes br{50%{transform:translateY(-1px)}}
 .lamp{animation:lamp 7s ease-in-out infinite alternate}@keyframes lamp{to{opacity:.82}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
@@ -316,10 +306,6 @@ ${glows.map((g) => g[0]).join('\n')}
 <g transform="scale(${S})" shape-rendering="crispEdges">
 ${base.svg()}
 ${layers.join('\n')}
-</g>
-<ellipse cx="${(CAT_X + 15) * S}" cy="${(CAT_Y + 18) * S}" rx="32" ry="6" fill="#000" opacity="${night ? 0.35 : 0.2}"/>
-<g transform="scale(${S})" shape-rendering="crispEdges">
-<g class="breathe">${catSprite(theme, CAT)}<g class="fr" style="animation:blink 5.7s steps(1) infinite">${catSprite(theme, CAT_BLINK)}</g></g>
 </g>
 ${glows.length ? `<g class="lamp" style="mix-blend-mode:screen">${glows.map((g) => g[1]).join('')}</g>` : ''}
 <g font-family="${FONT}">
